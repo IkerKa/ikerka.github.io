@@ -22,7 +22,7 @@ let doomInitialized = false;
 
 doomButton.addEventListener('click', () => {
   if (!doomInitialized) {
-    initDoom();
+    initSimpleDoom();
     doomInitialized = true;
   }
 });
