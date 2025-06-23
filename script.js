@@ -22,7 +22,12 @@ let doomInitialized = false;
 
 doomButton.addEventListener('click', () => {
   if (!doomInitialized) {
-    initSimpleDoom();
+    try {
+      initSimpleDoom();
+    } catch (e) {
+        console.error('Error initializing DOOM:', e);
+        alert('No se pudo cargar la sorpresa. Inténtalo de nuevo más tarde.');
+    }
     doomInitialized = true;
   }
 });
