@@ -151,3 +151,37 @@ nav a:hover {
         flex-direction: column;
     }
 }
+
+.easter-egg-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #8B0000;
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 9999;
+  opacity: 0.3;
+  transition: opacity 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.easter-egg-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.easter-egg-btn {
+  animation: pulse 2s infinite;
+}
