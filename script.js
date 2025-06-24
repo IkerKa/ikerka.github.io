@@ -15,12 +15,10 @@ contactForm.addEventListener('submit', function(e) {
     alert('¡Gracias por tu mensaje! Te responderé pronto.');
     contactForm.reset();
 });
-
-// Variables para el easter egg
 const doomButton = document.getElementById('doom-easter-egg');
 let gameSelectorVisible = false;
+let dosInstance = null; // Track the running game instance
 
-// Función para mostrar el selector de juegos
 function showGameSelector() {
     if (gameSelectorVisible) return;
     gameSelectorVisible = true;
@@ -47,8 +45,7 @@ function showGameSelector() {
     document.querySelectorAll('.game-card').forEach(card => {
         card.addEventListener('click', function() {
             const game = this.getAttribute('data-game');
-            waitForDosAndRun(() => launchGame(game));
-
+            launchGame(game);
             document.body.removeChild(gameSelector);
             gameSelectorVisible = false;
         });
@@ -68,57 +65,89 @@ function showGameSelector() {
 }
 
 function launchGame(game) {
-  const games = {
-    doom: {
-      bundleUrl: "https://js-dos.com/cdn/upload/DOOM-@evilution.zip",
-      title: "DOOM (1993)"
-    },
-    wolfenstein: { /* ... */ }
-  };
-
-  const selected = games[game];
-  if (!selected) return alert('Juego no encontrado');
-
-  const el = document.getElementById('jsdos');
-  el.style.display = 'block';
-
-  Dos(el)
-    .run(selected.bundleUrl)
-    .then(() => console.log(`${selected.title} iniciado`))
-    .catch(e => console.error('Error al iniciar:', e));
-    
-  // Cierre con tecla Escape
-  function escHandler(e) {
-    if (e.key === 'Escape') {
-      el.style.display = 'none';
-      document.removeEventListener('keydown', escHandler);
+    // Close any existing game instance
+    if (dosInstance) {
+        dosInstance.stop();
+        dosInstance = null;
     }
-  }
-  document.addEventListener('keydown', escHandler);
+
+    const games = {
+        doom: {
+            bundleUrl: "https://cdn.jsdelivr.net/gh/doszone/doom@master/DOOM.zip",
+            title: "DOOM (1993)"
+        },
+        wolfenstein: {
+            bundleUrl: "https://cdn.jsdelivr.net/gh/doszone/wolfenstein3d@master/Wolfenstein3D.zip",
+            title: "Wolfenstein 3D"
+        }
+    };
+
+    const selected = games[game];
+    if (!selected) return;
+
+    const container = document.getElementById('jsdos');
+    container.style.display = 'block';
+    container.innerHTML = ''; // Clear previous content
+
+    // Create close button
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'X';
+    closeBtn.classList.add('close-selector');
+    closeBtn.style.position = 'absolute';
+    closeBtn.style.top = '20px';
+    closeBtn.style.right = '20px';
+    closeBtn.style.zIndex = '10001';
+    closeBtn.addEventListener('click', closeGame);
+    container.appendChild(closeBtn);
+
+    // Create canvas for the game
+    const canvas = document.createElement('canvas');
+    container.appendChild(canvas);
+
+    // Initialize js-dos
+    dosInstance = Dos(canvas, {
+        wdosboxUrl: "https://js-dos.com/7.4.0/wdosbox.js",
+        autolock: true,
+        onerror: console.error,
+        onprogress: console.log
+    });
+
+    dosInstance.run(selected.bundleUrl)
+        .then(() => console.log(`${selected.title} started`))
+        .catch(e => console.error('Error starting game:', e));
+
+    function closeGame() {
+        if (dosInstance) {
+            dosInstance.stop();
+            dosInstance = null;
+        }
+        container.style.display = 'none';
+        document.removeEventListener('keydown', escHandler);
+    }
+
+    function escHandler(e) {
+        if (e.key === 'Escape') {
+            closeGame();
+        }
+    }
+
+    document.addEventListener('keydown', escHandler);
 }
 
-// Evento para el botón de easter egg
+// Easter egg button event
 doomButton.addEventListener('click', () => {
     if (!gameSelectorVisible) {
         showGameSelector();
     }
 });
 
-// Efecto de sonido al hacer clic
+// Sound effect
 doomButton.addEventListener('click', () => {
     try {
         const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-gun-click-1104.mp3');
         audio.volume = 0.3;
         audio.play();
     } catch (e) {
-        console.log('Error al reproducir sonido:', e);
+        console.log('Error playing sound:', e);
     }
 });
-
-function waitForDosAndRun(callback) {
-  if (typeof Dos === 'undefined') {
-    setTimeout(() => waitForDosAndRun(callback), 100);
-  } else {
-    callback();
-  }
-}
