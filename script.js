@@ -47,7 +47,8 @@ function showGameSelector() {
     document.querySelectorAll('.game-card').forEach(card => {
         card.addEventListener('click', function() {
             const game = this.getAttribute('data-game');
-            launchGame(game);
+            waitForDosAndRun(() => launchGame(game));
+
             document.body.removeChild(gameSelector);
             gameSelectorVisible = false;
         });
@@ -113,3 +114,11 @@ doomButton.addEventListener('click', () => {
         console.log('Error al reproducir sonido:', e);
     }
 });
+
+function waitForDosAndRun(callback) {
+  if (typeof Dos === 'undefined') {
+    setTimeout(() => waitForDosAndRun(callback), 100);
+  } else {
+    callback();
+  }
+}
